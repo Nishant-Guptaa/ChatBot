@@ -9,7 +9,11 @@ const Chat = require('./models/Chat');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
 app.use(bodyParser.json());
 app.use(express.json());
 
@@ -305,16 +309,16 @@ app.post('/api/chat', async (req, res) => {
         // Continue with the response even if saving fails
       }
 
-      res.json({ response });
+      return res.json({ response });
     } catch (error) {
       console.error('Error processing chat:', error);
-      res.status(500).json({ 
+      return res.status(500).json({ 
         error: error.message || 'An error occurred while processing your request' 
       });
     }
   } catch (error) {
     console.error('Error in chat route:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'An unexpected error occurred. Please try again.' 
     });
   }
