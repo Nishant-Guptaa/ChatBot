@@ -146,16 +146,20 @@ const ChatInterface = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message');
       }
 
       const data = await response.json();
+      if (!data.response) {
+        throw new Error('No response received from server');
+      }
       setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
     } catch (error) {
       console.error('Error:', error);
       setMessages(prev => [...prev, { 
         type: 'bot', 
-        content: 'Sorry, I encountered an error. Please try again.' 
+        content: error.message || 'Sorry, I encountered an error. Please try again.' 
       }]);
     } finally {
       setIsLoading(false);
