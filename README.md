@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Hair Care Chatbot
 
 A chatbot that provides hair care advice using AI. Built with Node.js, Express, React, and Google's Gemini AI.
@@ -72,3 +73,7 @@ A chatbot that provides hair care advice using AI. Built with Node.js, Express, 
   - React
   - Material-UI
   - Axios 
+=======
+# ChatBot
+Hair Care Assistant
+>>>>>>> cc6c537e9999fc89df922ce6f6ff90c5463b7fbe
