@@ -137,7 +137,7 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:10000/api/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,15 +145,16 @@ const ChatInterface = () => {
         body: JSON.stringify({ message: userMessage }),
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to send message');
+        throw new Error(data.error || 'Failed to send message');
       }
 
-      const data = await response.json();
       if (!data.response) {
         throw new Error('No response received from server');
       }
+
       setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
     } catch (error) {
       console.error('Error:', error);
