@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: hair-care-chatbot-backend
+    env: node
+    buildCommand: npm run install-backend
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false 
