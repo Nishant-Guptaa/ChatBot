@@ -137,7 +137,11 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://chat-bot-v7qv.onrender.com/api/chat'
+        : '/api/chat';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,18 +149,12 @@ const ChatInterface = () => {
         body: JSON.stringify({ message: userMessage }),
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error('JSON parsing error:', jsonError);
-        throw new Error('Invalid response from server');
-      }
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message');
       }
 
+      const data = await response.json();
       if (!data.response) {
         throw new Error('No response received from server');
       }
