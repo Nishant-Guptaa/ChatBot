@@ -37,7 +37,8 @@ const connectWithRetry = async () => {
     };
 
     console.log('Attempting to connect to MongoDB...');
-    await mongoose.connect(process.env.MONGODB_URI, mongoOptions);
+    const connectionString = process.env.MONGODB_URI.replace('mongodb://', 'mongodb+srv://');
+    await mongoose.connect(connectionString, mongoOptions);
     console.log('Connected to MongoDB successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error);
