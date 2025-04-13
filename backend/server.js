@@ -267,57 +267,56 @@ app.post('/api/chat', async (req, res) => {
 
     let response;
     
-    // Check if it's a welcome message request (only for greetings)
-    const isGreeting = message.toLowerCase().match(/^(hi|hello|hey|greetings|good (morning|afternoon|evening))/);
-    
-    if (isGreeting) {
-      response = await generateWelcomeMessage();
-    } else if (await isHairCareRelated(message)) {
-      response = await generateHairCareResponse(message);
-    } else {
-      response = await handleOutOfDomain(message);
-    }
-
-    // Save user message
-    const userChat = new Chat({
-      type: 'user',
-      content: message.trim(),
-      timestamp: new Date()
-    });
-
-    // Save bot response
-    const botChat = new Chat({
-      type: 'bot',
-      content: response.trim(),
-      timestamp: new Date()
-    });
-
     try {
-      await Promise.all([userChat.save(), botChat.save()]);
-      console.log('Chat saved successfully');
-    } catch (dbError) {
-      console.error('Error saving chat to database:', dbError);
-      // Continue with the response even if saving fails
-    }
+      // Check if it's a welcome message request (only for greetings)
+      const isGreeting = message.toLowerCase().match(/^(hi|hello|hey|greetings|good (morning|afternoon|evening))/);
+      
+      if (isGreeting) {
+        response = await generateWelcomeMessage();
+      } else if (await isHairCareRelated(message)) {
+        response = await generateHairCareResponse(message);
+      } else {
+        response = await handleOutOfDomain(message);
+      }
 
-    res.json({ response });
+      if (!response) {
+        throw new Error('Failed to generate response');
+      }
+
+      // Save user message
+      const userChat = new Chat({
+        type: 'user',
+        content: message.trim(),
+        timestamp: new Date()
+      });
+
+      // Save bot response
+      const botChat = new Chat({
+        type: 'bot',
+        content: response.trim(),
+        timestamp: new Date()
+      });
+
+      try {
+        await Promise.all([userChat.save(), botChat.save()]);
+        console.log('Chat saved successfully');
+      } catch (dbError) {
+        console.error('Error saving chat to database:', dbError);
+        // Continue with the response even if saving fails
+      }
+
+      res.json({ response });
+    } catch (error) {
+      console.error('Error processing chat:', error);
+      res.status(500).json({ 
+        error: error.message || 'An error occurred while processing your request' 
+      });
+    }
   } catch (error) {
     console.error('Error in chat route:', error);
-    
-    // Handle specific error types
-    if (error.message.includes('API key')) {
-      res.status(500).json({ 
-        error: 'Service configuration error. Please check your API settings.' 
-      });
-    } else if (error.message.includes('models/')) {
-      res.status(500).json({ 
-        error: 'AI model configuration error. Please check the model name.' 
-      });
-    } else {
-      res.status(500).json({ 
-        error: error.message || 'An error occurred while processing your request. Please try again.' 
-      });
-    }
+    res.status(500).json({ 
+      error: 'An unexpected error occurred. Please try again.' 
+    });
   }
 });
 
