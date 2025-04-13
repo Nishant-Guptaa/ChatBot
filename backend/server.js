@@ -27,12 +27,20 @@ if (!process.env.MONGODB_URI) {
 // Connect to MongoDB with retry logic
 const connectWithRetry = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
+    const mongoOptions = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-    });
+      ssl: true,
+      sslValidate: true,
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false,
+      retryWrites: true,
+      w: 'majority'
+    };
+
+    await mongoose.connect(process.env.MONGODB_URI, mongoOptions);
     console.log('Connected to MongoDB successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error);
