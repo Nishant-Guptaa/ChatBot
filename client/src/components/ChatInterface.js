@@ -145,8 +145,14 @@ const ChatInterface = () => {
         body: JSON.stringify({ message: userMessage }),
       });
 
-      const data = await response.json();
-      
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('JSON parsing error:', jsonError);
+        throw new Error('Invalid response from server');
+      }
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send message');
       }

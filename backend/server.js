@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: './.env' });
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -7,15 +7,6 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Chat = require('./models/Chat');
 
 const app = express();
-
-// Middleware
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type']
-}));
-app.use(bodyParser.json());
-app.use(express.json());
 
 // Validate environment variables
 if (!process.env.GOOGLE_API_KEY) {
@@ -28,12 +19,22 @@ if (!process.env.MONGODB_URI) {
   process.exit(1);
 }
 
+// Middleware
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL 
+    : 'http://localhost:3000',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true
+}));
+app.use(bodyParser.json());
+app.use(express.json());
+
 // Connect to MongoDB with retry logic
 const connectWithRetry = async () => {
   try {
     const mongoOptions = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       retryWrites: true,
@@ -41,7 +42,7 @@ const connectWithRetry = async () => {
     };
 
     console.log('Attempting to connect to MongoDB...');
-    const connectionString = process.env.MONGODB_URI.replace('mongodb://', 'mongodb+srv://');
+    const connectionString = process.env.MONGODB_URI;
     await mongoose.connect(connectionString, mongoOptions);
     console.log('Connected to MongoDB successfully');
   } catch (error) {
@@ -322,6 +323,21 @@ app.post('/api/chat', async (req, res) => {
       error: 'An unexpected error occurred. Please try again.' 
     });
   }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ 
+    error: 'An unexpected error occurred. Please try again.' 
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: 'Route not found' 
+  });
 });
 
 // Get chat history route

@@ -7,7 +7,9 @@
     "start": "cd backend && npm install && npm start",
     "install-backend": "cd backend && npm install",
     "install-frontend": "cd client && npm install",
-    "install-all": "npm run install-backend && npm run install-frontend"
+    "install-all": "npm run install-backend && npm run install-frontend",
+    "build": "cd client && npm run build",
+    "heroku-postbuild": "npm run install-all && npm run build"
   },
   "author": "",
   "license": "ISC"
